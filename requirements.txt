@@ -1,0 +1,4 @@
+gTTS
+PyObjC
+playsound
+
