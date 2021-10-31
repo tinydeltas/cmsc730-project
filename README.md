@@ -4,23 +4,22 @@
 
 ### Milestone 1 (Predefined gestures)
 - Data collection 
-- Data pre-processing 
+- Data pre-processing
+- Spectogram generation 
 - Few-shot learning implementation 
-- Dataset discovery 
-- Transfer learning implementation 
 
 ### Milestone 2 (Personalization and refinements)
 - LSTM implementation 
 - MLP implementation 
+- Dataset discovery 
+- Transfer learning implementation 
 - Web application interface 
 - Data collection with on-board microphone (PC or mobile)
-- Transfer learning refinements 
 
-Milestone 3 (Real-time data): 
+### Milestone 3 (Real-time data)
 - Gesture detection 
 
 ## Pre-defined gestures
-
 
 ### Gesture to verbal command mapping 
 

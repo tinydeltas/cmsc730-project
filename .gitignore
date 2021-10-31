@@ -1,2 +1,8 @@
 .DS_Store
 venv 
+data/images/*/train*
+data/images/*/test*
+pipeline/__pycache__
+models
+tmp
+
