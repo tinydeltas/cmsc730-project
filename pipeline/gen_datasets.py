@@ -18,7 +18,7 @@ class DatasetLoader:
         
         self.all_folder = os.path.join(data_path, 'all')
         
-        save_path = os.path.join(param_dataset_path, run, spectrogram_type)
+        save_path = os.path.join(param_dataset_path, run, "images", spectrogram_type)
         
         self.train_folder = os.path.join(save_path, "train")
         os.makedirs(self.train_folder)
@@ -45,7 +45,6 @@ class DatasetLoader:
                 
         n_examples = len([name for name in os.listdir(test_gesture_path)])
         n_training = int(n_examples * param_training_percentage)
-        n_validate = n_examples - n_training 
         
         # print("Training examples: ", n_training)
         # print("Validation examples: ", n_validate)
@@ -87,7 +86,7 @@ class DatasetLoader:
                 X.append(np.stack(category_images))
             except ValueError as e:
                 print(e)
-                print("error - category_images:", category_images)
+                # print("error - category_images:", category_images)
             curr_y += 1
             
             self.gest_dict[gesture][1] = curr_y - 1
