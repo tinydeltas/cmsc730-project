@@ -316,5 +316,6 @@ class OneshotLoader:
 
         plt.plot(ways,100.0/ways, "r")
         plt.show()
+        
         plt.savefig()
         
