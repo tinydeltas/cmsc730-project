@@ -1,14 +1,10 @@
 
 import os 
 import time
-import pickle
 import numpy as np
-import matplotlib as plt
 import numpy.random as rng
 
 from sklearn.utils import shuffle
-
-from tensorflow.keras.optimizers import Adam
 
 from keras.models import Sequential
 from keras.layers import Conv2D, Input
@@ -17,68 +13,15 @@ from keras.layers.pooling import MaxPooling2D
 from keras.layers.core import Lambda, Flatten, Dense
 from keras.optimizers import *
 from keras import backend as K
-K.set_image_data_format('channels_last')
 from keras.regularizers import l2
+K.set_image_data_format('channels_last')
 
-models_path = "../models"
+from ml_generic import Loader
+from constants import *
 
-param_loss_function = "binary_crossentropy"
-param_optimizer = Adam(lr = 0.00006)
-
-data_subsets = ["train", "val"]
-
-evaluate_every = 100 # interval for evaluating on one-shot tasks
-loss_every = 10 # interval for printing loss (iterations)
-batch_size = 2
-n_iterations = 1000
-N_way = 8 # how many classes for testing one-shot tasks>
-n_val = 7 # how many one-shot tasks to validate on?
-
-ways = np.arange(1, 9, 1)
-trials = 100
-
-def nearest_neighbour_correct(pairs, targets):
-    """
-    Returns 1 if nearest neighbour gets the correct answer for a one-shot task
-        given by (pairs, targets)
-    """
-    L2_distances = np.zeros_like(targets)
-    for i in range(len(targets)):
-        L2_distances[i] = np.sum(np.sqrt(pairs[0][i]**2 - pairs[1][i]**2))
-    if np.argmin(L2_distances) == np.argmax(targets):
-        return 1
-    return 0
-
-
-def test_nn_accuracy(N_ways, n_trials, loader):
-    """
-    Returns accuracy of one shot
-    """
-    print("Evaluating nearest neighbour on {} unique {} way one-shot learning tasks ...".format(n_trials,N_ways))
-
-    n_right = 0
-    
-    for i in range(n_trials):
-        pairs,targets = loader.make_task(N_ways,"val")
-        correct = nearest_neighbour_correct(pairs,targets)
-        n_right += correct
-    return 100.0 * n_right / n_trials
-
-class OneshotLoader: 
-    def __init__(self, path, spectrogram_type):
-        self.data = {}
-        self.categories = {}
-        self.info = {}
-        self.weights_path = os.path.join(models_path, spectrogram_type + "_model_weights.h5")
-        
-        for name in data_subsets:
-            file_path = os.path.join(path + "processed", name + ".pickle")
-            print("loading data from {}".format(file_path))
-            
-            with open(file_path, "rb") as f:
-                (X,c) = pickle.load(f)
-                self.data[name] = X
-                self.categories[name] = c
+class OneshotLoader(Loader): 
+    def __init__(self, path, spectrogram_type, run_path):
+        super().__init__(path, spectrogram_type, run_path)
 
     def initialize_bias(self, shape, dtype=None):
         """
@@ -204,7 +147,7 @@ class OneshotLoader:
         """
         
         while True:
-            pairs, targets = self.get_batch(batch_size,s)
+            pairs, targets = self.get_batch(batch_size, s)
             yield (pairs, targets)    
 
     def make_task(self, N, s="val"):
@@ -212,12 +155,15 @@ class OneshotLoader:
         Create pairs of test image, support set for testing N way one-shot learning. 
         """
         X = self.data[s]
+        
         n_classes, n_examples, w, h, _ = X.shape
+        # print("shape: ", n_classes, n_examples)
         indices = rng.randint(0, n_examples, size=(N,))
         
         categories = rng.choice(range(n_classes), size=(N,), replace=False)            
         
         true_category = categories[0]
+        
         
         ex1, ex2 = rng.choice(n_examples, replace=False, size=(2,))
         
@@ -248,20 +194,18 @@ class OneshotLoader:
             inputs, targets = self.make_task(N, s)
             probs = model.predict(inputs)
             if np.argmax(probs) == np.argmax(targets):
-                n_correct+=1
+                n_correct += 1
         
         percent_correct = (100.0 * n_correct / k)
         
         if verbose:
-            print("Got an average of {}% {} way one-shot learning accuracy \n".format(percent_correct,N))
+            print("Got an average of {}% {} way one-shot learning accuracy \n".format(percent_correct, N))
         
         return percent_correct
     
-    # def train(self, model, epochs, verbosity, batch_size):
-    #     model.fit_generator(self.generate(batch_size))
-    
-    
     def train(self): 
+        best = -1 
+        
         # Intialize bias with mean 0.0 and standard deviation of 10^-2
         weights = self.initialize_weights((1000, 1))
     
@@ -278,44 +222,24 @@ class OneshotLoader:
         print("-------------------------------------")
         t_start = time.time()
 
-        for i in range(1, n_iterations):
-            (inputs,targets) = self.get_batch(batch_size)
-            loss = model.train_on_batch(inputs,targets)
-            print("\n ------------- \n")
-            print("Loss: {0}".format(loss)) 
+        for i in range(1, param_n_iterations):
+            (inputs, targets) = self.get_batch(param_batch_size_per_trial)
+            loss = model.train_on_batch(inputs, targets)
+            # print("\n ------------- \n")
+            # print("Loss: {0}".format(loss)) 
             
-            if i % evaluate_every == 0:
+            if i % param_evaluate_every == 0:
                 print("Time for {0} iterations: {1}".format(i, time.time()-t_start))
-                val_acc = self.test(model,N_way,n_val,verbose=True)
+                val_acc = self.test(model, param_N_way, param_n_val, verbose=True)
                 if val_acc >= best:
                     print("Current best: {0}, previous best: {1}".format(val_acc, best))
-                    print("Saving weights to: {0} \n".format(weights_path))
+                    print("Saving weights to: {0} \n".format(self.weights_path))
                     model.save_weights(self.weights_path)
                     best = val_acc
             
-            # if i % loss_every == 0:
-            #     print("iteration", i)
-            #     print("training loss: ", loss)
+            if i % param_print_loss_every == 0:
+                print("iteration", i)
+                print("training loss: ", loss)
 
-        model.load_weights(self.weights_path)
-        self.model = model 
+        return model
     
-
-
-    def compare(self): 
-        val_accs, train_accs,nn_accs = [], [], []
-
-        for N in ways:
-            val_accs.append(self.test(self.model, N, trials, "val", verbose=True))
-            train_accs.append(self.test(self.model, N, trials, "train", verbose=True))
-            nn_accs.append(test_nn_accuracy(N,trials, self))
-
-        plt.plot(ways, val_accs, "m")
-        plt.plot(ways, train_accs, "y")
-        plt.plot(ways, nn_accs, "c")
-
-        plt.plot(ways,100.0/ways, "r")
-        plt.show()
-        
-        plt.savefig()
-        

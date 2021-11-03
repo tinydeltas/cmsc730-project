@@ -16,7 +16,30 @@ ipython kernel install --name "local-venv" --user
 python -m pip install -r requirements.txt
 ```
 
-2. Run `pipeline.py`: 
+2. Run `pipeline.py`: Defines and trains input image types on 7-layer CNN Siamese network model. Takes about 10 minutes per image type, for total of ~1.5 hours to train and compare on every image type. 
+
+```
+Model: "model"
+__________________________________________________________________________________________________
+Layer (type)                    Output Shape         Param #     Connected to                     
+==================================================================================================
+input_1 (InputLayer)            [(None, 100, 100, 3) 0                                            
+__________________________________________________________________________________________________
+input_2 (InputLayer)            [(None, 100, 100, 3) 0                                            
+__________________________________________________________________________________________________
+sequential (Sequential)         (None, 4096)         27426112    input_1[0][0]                    
+                                                                 input_2[0][0]                    
+__________________________________________________________________________________________________
+lambda (Lambda)                 (None, 4096)         0           sequential[0][0]                 
+                                                                 sequential[1][0]                 
+__________________________________________________________________________________________________
+dense_1 (Dense)                 (None, 1)            4097        lambda[0][0]                     
+==================================================================================================
+Total params: 27,430,209
+Trainable params: 27,430,209
+Non-trainable params: 0
+``` 
+
 ## Directory overview 
 - `data/`: Data for predefined gestures. 
     - `images`: The spectrogram images generated from the raw `.wav` files
@@ -30,12 +53,27 @@ python -m pip install -r requirements.txt
     `gestures`: labels for the pre-defined gestures (corresponding to the names of their respective folders in `data/images`)
     
     Other tweakable parameters: 
+            `param_loss_function`: Loss function for the ML model. 
+            `param_optimizer`: Optimizer algorithm. 
+            **Default: Adam (Stochastic gradient descent).**
+            `param_N_way`: How many classes to assign a potential task to. 
+            **Default: 8 (for the 8 pre-defined gestures)**
+            `param_n_val`: How many tasks to validate on. 
+            **Default: 7** 
+            `param_batch_size_per_trial`: 
+            **Default: 7**
+            `param_n_trials`: Number of trials to perform during the validation phase. 
+            **Default: 100** 
+            `param_n_iterations`: Number of epochs to train the model on. 
+            **Default: 1000**
             `param_data_path`: Directory for output of spectrogram generation step. 
-            **Default `./data/images/`**
+            **Default: `./data/images/`**
             `param_dataset_path`: Directory for output of each run. 
-            **Default `./tmp`.**
+            **Default: `./tmp`.**
             `param_training_percentage`: Percentage of dataset for each gesture that will be allotted to the trainings set. 
-            **Default 0.55.**
+            **Default: 0.55.**
+            `param_wav_directory`: Directory of raw `.wav` files. 
+            **Default: `./data/wav`**
     
     - `gen_spectrograms.py`: Produces spectrograms from raw sound data. 
     

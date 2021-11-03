@@ -2,18 +2,16 @@ import os
 import numpy as np
 import wave
 import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
 from shutil import copy2 as cp
 import librosa 
 import librosa.display
-from scipy.io import wavfile as wav
-from scipy.fftpack import fft
 from PIL import Image, ImageChops
 
-from constants import input_image_types
+from constants import *
 
-wav_directory = "./data/wav"
 n_mels = 128
+height = 100 
+width = 100
     
 def trim_image(name):
     im = Image.open(name)
@@ -23,9 +21,12 @@ def trim_image(name):
     bbox = diff.convert('RGB').getbbox()
     if not bbox: 
         exit
-    im = im.crop(bbox)
-    im.save(name)
+    return im.crop(bbox)
 
+def resize_image(name): 
+    im = Image.open(name)
+    return im.resize((height, width))
+        
 def process_wav(wavname):
     wav = wave.open(wavname, 'r')
     frames = wav.readframes(-1)
@@ -96,7 +97,7 @@ class SpectrogramLoader:
         self.save_spectrogram(fig, "chroma", librosa=True)
     
         
-    def save_spectrogram(self, fig, kind, librosa=False): 
+    def save_spectrogram(self, fig, kind, librosa): 
         plt.axis('off')
         
         label = self.name.split("_")
@@ -117,6 +118,9 @@ class SpectrogramLoader:
         
         if librosa: 
             trim_image(full_name)
+        
+        im = resize_image(full_name)
+        im.save(full_name)
 
     def all_spectrograms(self): 
         self.get_mel_spectrogram()
@@ -126,10 +130,9 @@ class SpectrogramLoader:
         self.get_mfcc()
         self.get_spectrogram()
 
-
-
 def main(): 
-    for entry in os.scandir(wav_directory):
+    
+    for entry in os.scandir(param_wav_directory):
         if (entry.path.endswith(".wav") and entry.is_file()):
             print(entry.path)
             loader = SpectrogramLoader(entry.path)

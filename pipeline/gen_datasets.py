@@ -6,11 +6,7 @@ from datetime import datetime
 import numpy as np
 import cv2 as cv
 
-from constants import input_image_types, gestures
-
-param_data_path = "./data/images/"
-param_dataset_path = "./tmp"
-param_training_percentage = 0.55 
+from constants import *
 
 class DatasetLoader: 
     def __init__(self, spectrogram_type, run): 
@@ -18,7 +14,7 @@ class DatasetLoader:
         
         self.all_folder = os.path.join(data_path, 'all')
         
-        save_path = os.path.join(param_dataset_path, run, spectrogram_type)
+        save_path = os.path.join(param_dataset_path, run, "images", spectrogram_type)
         
         self.train_folder = os.path.join(save_path, "train")
         os.makedirs(self.train_folder)
@@ -40,15 +36,11 @@ class DatasetLoader:
         to_filename = os.path.join(folder, g + "/" + basename)
         shutil.copy(from_filename, to_filename)
         
-    def divide(self): 
+    def divide(self, gestures): 
         test_gesture_path = os.path.join(self.all_folder, gestures[0])
                 
         n_examples = len([name for name in os.listdir(test_gesture_path)])
         n_training = int(n_examples * param_training_percentage)
-        n_validate = n_examples - n_training 
-        
-        # print("Training examples: ", n_training)
-        # print("Validation examples: ", n_validate)
         
         for g in gestures: 
             gesture_path = os.path.join(self.all_folder, g)
@@ -87,7 +79,7 @@ class DatasetLoader:
                 X.append(np.stack(category_images))
             except ValueError as e:
                 print(e)
-                print("error - category_images:", category_images)
+                # print("error - category_images:", category_images)
             curr_y += 1
             
             self.gest_dict[gesture][1] = curr_y - 1
@@ -95,8 +87,8 @@ class DatasetLoader:
         self.Y = np.vstack(Y)
         self.X = np.stack(X)
 
-    def generate(self): 
-        self.divide()
+    def generate(self, gestures): 
+        self.divide(gestures)
         
         self.load(self.train_folder)
         with open(os.path.join(self.save_folder, "train.pickle"), "wb") as f:
