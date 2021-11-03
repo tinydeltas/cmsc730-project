@@ -1,7 +1,7 @@
 import os 
 import pickle 
 
-data_subsets = ["train", "val"]
+from constants import *
 
 class Loader: 
     def __init__(self, path, spectrogram_type, run_path):

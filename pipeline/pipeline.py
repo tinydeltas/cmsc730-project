@@ -2,17 +2,18 @@ import os
 from datetime import datetime
 import matplotlib.pyplot as plt
 import numpy as np
+import random
 
 from ml_siamese import OneshotLoader
 from gen_datasets import DatasetLoader
-from constants import input_image_types
+from constants import *
 
 run = datetime.now().strftime("%m_%d_%Y_%H:%M:%S")
 dataset_path = "./tmp"
 run_path = os.path.join(dataset_path, run)
 
 ways = np.arange(1, 9, 1)
-trials = 100
+
 
 def nearest_neighbour_correct(pairs, targets):
     """
@@ -28,9 +29,6 @@ def nearest_neighbour_correct(pairs, targets):
 
 
 def test_nn_accuracy(N_ways, n_trials, loader):
-    """
-    Returns accuracy of one shot
-    """
     print("Evaluating nearest neighbour on {} unique {} way one-shot learning tasks ...".format(n_trials,N_ways))
 
     n_right = 0
@@ -44,9 +42,14 @@ def test_nn_accuracy(N_ways, n_trials, loader):
 def compare_all(save_path, accs): 
     fig, ax = plt.subplots()
     
-    for name in accs: 
-        plt.plot(ways, accs[name], "", label=name)
+    no_of_colors = len(accs.keys())
+    color=[ "#"+''.join([random.choice('0123456789ABCDEF') for i in range(6)]) for j in range(no_of_colors)]
     
+    for name in accs: 
+        plt.plot(ways, accs[name], color[0], label=name)
+        color = color[1:]
+    
+    plt.plot(ways, 100.0 / ways, "r", label="random")
     ax.legend()
     
     results_path = os.path.join(save_path, "all")
@@ -58,11 +61,9 @@ def compare(loader, model):
     val_accs, train_accs, nn_accs = [], [], []
 
     for N in ways:
-        val_accs.append(loader.test(model, N, trials, "val", verbose=True))
-        train_accs.append(loader.test(model, N, trials, "train", verbose=True))
-        nn_accs.append(test_nn_accuracy(N, trials, loader))
-
-    
+        val_accs.append(loader.test(model, N, param_n_trials, "val", verbose=True))
+        train_accs.append(loader.test(model, N, param_n_trials, "train", verbose=True))
+        nn_accs.append(test_nn_accuracy(N, param_n_trials, loader))
     
     plt.plot(ways, val_accs, "m", label="validation")
     plt.plot(ways, train_accs, "y", label="training")
@@ -81,7 +82,7 @@ def main():
     accs = {}
     results_folder = ""
     
-    for spectrogram_type in input_image_types: 
+    for spectrogram_type in param_input_image_types: 
         if spectrogram_type in skip:
             print("skipping: ", spectrogram_type) 
             continue
@@ -89,7 +90,7 @@ def main():
         print("running ML analysis on spectrogram type: ", spectrogram_type)
         
         dl = DatasetLoader(spectrogram_type, run)
-        dl.generate()
+        dl.generate(param_default_gestures)
         
         data_path = os.path.join(run_path, "images", spectrogram_type) + "/"
 
@@ -104,7 +105,6 @@ def main():
         
         # save validation accuracies
         accs[spectrogram_type] = compare(loader, model)
-        break
     
     compare_all(results_folder, accs)
         

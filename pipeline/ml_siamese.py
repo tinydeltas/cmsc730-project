@@ -1,14 +1,10 @@
 
 import os 
 import time
-import pickle
 import numpy as np
-import matplotlib as plt
 import numpy.random as rng
 
 from sklearn.utils import shuffle
-
-from tensorflow.keras.optimizers import Adam
 
 from keras.models import Sequential
 from keras.layers import Conv2D, Input
@@ -17,20 +13,11 @@ from keras.layers.pooling import MaxPooling2D
 from keras.layers.core import Lambda, Flatten, Dense
 from keras.optimizers import *
 from keras import backend as K
-K.set_image_data_format('channels_last')
 from keras.regularizers import l2
+K.set_image_data_format('channels_last')
 
 from ml_generic import Loader
-
-param_loss_function = "binary_crossentropy"
-param_optimizer = Adam(lr = 0.00006)
-
-evaluate_every = 10 # interval for evaluating on one-shot tasks
-loss_every = 10 # interval for printing loss (iterations)
-batch_size = 7
-n_iterations = 50
-N_way = 8 # how many classes for testing one-shot tasks>
-n_val = 7 # how many one-shot tasks to validate on?
+from constants import *
 
 class OneshotLoader(Loader): 
     def __init__(self, path, spectrogram_type, run_path):
@@ -216,10 +203,6 @@ class OneshotLoader(Loader):
         
         return percent_correct
     
-    # def train(self, model, epochs, verbosity, batch_size):
-    #     model.fit_generator(self.generate(batch_size))
-    
-    
     def train(self): 
         best = -1 
         
@@ -239,24 +222,24 @@ class OneshotLoader(Loader):
         print("-------------------------------------")
         t_start = time.time()
 
-        for i in range(1, n_iterations):
-            (inputs, targets) = self.get_batch(batch_size)
+        for i in range(1, param_n_iterations):
+            (inputs, targets) = self.get_batch(param_batch_size_per_trial)
             loss = model.train_on_batch(inputs, targets)
             # print("\n ------------- \n")
             # print("Loss: {0}".format(loss)) 
             
-            if i % evaluate_every == 0:
+            if i % param_evaluate_every == 0:
                 print("Time for {0} iterations: {1}".format(i, time.time()-t_start))
-                val_acc = self.test(model, N_way, n_val, verbose=True)
+                val_acc = self.test(model, param_N_way, param_n_val, verbose=True)
                 if val_acc >= best:
                     print("Current best: {0}, previous best: {1}".format(val_acc, best))
                     print("Saving weights to: {0} \n".format(self.weights_path))
                     model.save_weights(self.weights_path)
                     best = val_acc
             
-            # if i % loss_every == 0:
-            #     print("iteration", i)
-            #     print("training loss: ", loss)
+            if i % param_print_loss_every == 0:
+                print("iteration", i)
+                print("training loss: ", loss)
 
         return model
     

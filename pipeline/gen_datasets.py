@@ -6,11 +6,7 @@ from datetime import datetime
 import numpy as np
 import cv2 as cv
 
-from constants import input_image_types, gestures
-
-param_data_path = "./data/images/"
-param_dataset_path = "./tmp"
-param_training_percentage = 0.55 
+from constants import *
 
 class DatasetLoader: 
     def __init__(self, spectrogram_type, run): 
@@ -40,14 +36,11 @@ class DatasetLoader:
         to_filename = os.path.join(folder, g + "/" + basename)
         shutil.copy(from_filename, to_filename)
         
-    def divide(self): 
+    def divide(self, gestures): 
         test_gesture_path = os.path.join(self.all_folder, gestures[0])
                 
         n_examples = len([name for name in os.listdir(test_gesture_path)])
         n_training = int(n_examples * param_training_percentage)
-        
-        # print("Training examples: ", n_training)
-        # print("Validation examples: ", n_validate)
         
         for g in gestures: 
             gesture_path = os.path.join(self.all_folder, g)
@@ -94,8 +87,8 @@ class DatasetLoader:
         self.Y = np.vstack(Y)
         self.X = np.stack(X)
 
-    def generate(self): 
-        self.divide()
+    def generate(self, gestures): 
+        self.divide(gestures)
         
         self.load(self.train_folder)
         with open(os.path.join(self.save_folder, "train.pickle"), "wb") as f:
