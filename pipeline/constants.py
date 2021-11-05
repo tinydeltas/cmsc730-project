@@ -20,8 +20,8 @@ param_default_gestures = [
     "close", 
     "cut", 
     "no", 
-    "oldown", # aka voldown 
-    "olup", # aka volup
+    "minimize", # aka voldown / minimize
+    "maximize", # aka volume up
     "open", 
     "switch", 
     "tap"
@@ -36,8 +36,8 @@ param_batch_size_per_trial = 7
 param_n_trials = 100
 param_n_iterations = 1000
 
-param_evaluate_every = 10 # interval for evaluating on one-shot tasks
-param_print_loss_every = 10 # interval for printing loss (iterations)
+param_evaluate_every = 10 
+param_print_loss_every = 10 
 
 param_data_path = "./data/images/"
 param_dataset_path = "./tmp"

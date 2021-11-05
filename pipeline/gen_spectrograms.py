@@ -69,7 +69,7 @@ class SpectrogramLoader:
         s_db = librosa.amplitude_to_db(S_2, ref=np.max)
         img = librosa.display.specshow(s_db, y_axis='log', x_axis='time', ax=ax)
         
-        self.save_spectrogram(fig, "sfft", librosa=True)
+        self.save_spectrogram(fig, "stft", librosa=True)
     
     def get_sfft_chromagram(self): 
         fig, ax = plt.subplots()
@@ -78,7 +78,7 @@ class SpectrogramLoader:
         chroma = librosa.feature.chroma_stft(S=S, sr=self.sr)
         img = librosa.display.specshow(chroma, y_axis='chroma', x_axis='time', ax=ax)
         
-        self.save_spectrogram(fig, "sfftchroma", librosa=True)
+        self.save_spectrogram(fig, "stftchroma", librosa=True)
     
     def get_mfcc(self):
         fig, ax = plt.subplots()

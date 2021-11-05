@@ -2,7 +2,14 @@
 
 ## Description 
 
+Given acoustic data captured by 
+
 ## Getting started
+
+**Requirements** 
+Python 3.73+
+
+May need twiddling to work on an M1 chip. 
 
 1. Set up virtualenv using `setup.sh` or by running 
 
@@ -16,29 +23,17 @@ ipython kernel install --name "local-venv" --user
 python -m pip install -r requirements.txt
 ```
 
-2. Run `pipeline.py`: Defines and trains input image types on 7-layer CNN Siamese network model. Takes about 10 minutes per image type, for total of ~1.5 hours to train and compare on every image type. 
+2. Run `gen_spectrograms.py`: Generates spectrogram images from the `.wav` raws. Stores them in `param_data_path` (see below). 
 
 ```
-Model: "model"
-__________________________________________________________________________________________________
-Layer (type)                    Output Shape         Param #     Connected to                     
-==================================================================================================
-input_1 (InputLayer)            [(None, 100, 100, 3) 0                                            
-__________________________________________________________________________________________________
-input_2 (InputLayer)            [(None, 100, 100, 3) 0                                            
-__________________________________________________________________________________________________
-sequential (Sequential)         (None, 4096)         27426112    input_1[0][0]                    
-                                                                 input_2[0][0]                    
-__________________________________________________________________________________________________
-lambda (Lambda)                 (None, 4096)         0           sequential[0][0]                 
-                                                                 sequential[1][0]                 
-__________________________________________________________________________________________________
-dense_1 (Dense)                 (None, 1)            4097        lambda[0][0]                     
-==================================================================================================
-Total params: 27,430,209
-Trainable params: 27,430,209
-Non-trainable params: 0
-``` 
+python gen_spectrograms.py 
+```
+
+3. Run `pipeline.py`: Defines and trains input image types on 7-layer CNN Siamese network model. Takes about 10 minutes per image type, for total of ~1.5 hours to train and compare on every image type. 
+
+```
+python pipeline.py 
+```
 
 ## Directory overview 
 - `data/`: Data for predefined gestures. 
@@ -47,32 +42,42 @@ Non-trainable params: 0
 
 - `pipeline/` 
     - `constants.py`: 
+
+            -    `param_input_image_types`: Defines the input image (spectrogram) types we are interested in feeding to the ML model for training and validation. 
     
-    `input_image_types`: Defines the input image (spectrogram) types we are interested in feeding to the ML model for training and validation. 
-    
-    `gestures`: labels for the pre-defined gestures (corresponding to the names of their respective folders in `data/images`)
-    
-    Other tweakable parameters: 
-            `param_loss_function`: Loss function for the ML model. 
-            `param_optimizer`: Optimizer algorithm. 
-            **Default: Adam (Stochastic gradient descent).**
-            `param_N_way`: How many classes to assign a potential task to. 
-            **Default: 8 (for the 8 pre-defined gestures)**
-            `param_n_val`: How many tasks to validate on. 
-            **Default: 7** 
-            `param_batch_size_per_trial`: 
-            **Default: 7**
-            `param_n_trials`: Number of trials to perform during the validation phase. 
+            - `param_default_gestures`: labels for the pre-defined gestures (corresponding to the names of their respective folders in `data/images`)
+
+            - `param_loss_function`: Loss function for the ML model.
+            **Default: `binary_crossentropy`** 
+            
+            - `param_optimizer`: Optimizer algorithm. 
+            **Default: Adam (Stochastic gradient descent).**           
+            
+            - `param_N_way`: How many classes to assign a potential task to. 
+            **Default: 8 (for the 8 pre-defined gestures)**          
+            
+            - `param_n_val`: How many tasks to validate on. 
+            **Default: 7**           
+            
+            - `param_batch_size_per_trial`: Number of paired batch tasks per trial. 
+            **Default: 7**          
+            
+            - `param_n_trials`: Number of trials to perform during the validation phase. 
             **Default: 100** 
-            `param_n_iterations`: Number of epochs to train the model on. 
+            
+            - `param_n_iterations`: Number of epochs to train the model on. 
             **Default: 1000**
-            `param_data_path`: Directory for output of spectrogram generation step. 
+            
+            - `param_data_path`: Directory for output of spectrogram generation step. 
             **Default: `./data/images/`**
-            `param_dataset_path`: Directory for output of each run. 
+            
+            - `param_dataset_path`: Directory for output of each run. 
             **Default: `./tmp`.**
-            `param_training_percentage`: Percentage of dataset for each gesture that will be allotted to the trainings set. 
+            
+            - `param_training_percentage`: Percentage of dataset for each gesture that will be allotted to the trainings set.
             **Default: 0.55.**
-            `param_wav_directory`: Directory of raw `.wav` files. 
+            
+            - `param_wav_directory`: Directory of raw `.wav` files. 
             **Default: `./data/wav`**
     
     - `gen_spectrograms.py`: Produces spectrograms from raw sound data. 
@@ -81,48 +86,11 @@ Non-trainable params: 0
     
     - `ml_siamese.py`: Defines the `Fewshot` implementation. Skeleton code taken from https://github.com/akshaysharma096/Siamese-Networks and heavily modified for the purposes of this assignment.  
 
-    - `pipeline.py`: Runs the overall pipeline. 
+    - `pipeline.py`: Runs the whole pipeline. 
 
 
 Temporary folders
 - `tmp` Stores the dataset, ML models, and results for each run 
     - `YYYY-MM-DD HH-MM-SS`: Overall run folder, corresponding to each time `pipeline.py` is run. 
-        - `models`
-        - `results`: 
-
-## Project roadmap 
-
-### Milestone 1 (Predefined gestures)
-- Data collection of pre-defined gestures: collected using SEEED microphone 
-- Spectogram generation 
-- Few-shot learning implementation 
-#### Pre-defined gestures to verbal command mapping for Alexa/Google 
-
-Lights
-- Open ("Turn on the lights") 
-- Close ("Turn off the lights")
-
-Music
-- Volume down (on music)
-- Volume up (on music)
-
-Calls
-- No (hang up a call)
-
-Misc 
-- Tap (Check my calendar today)
-- Cut (what's the weather)
-- Switch (what's the time) 
-
-
-### Milestone 2 (Real-time gesture detection and personalization)
-- Gesture detection 
-- Web application interface 
-- ML experiments 
-    - LSTM implementation 
-    - MLP implementation 
-    - Transfer learning implementation 
-        - Dataset discovery
-- Data collection with on-board microphone (PC or mobile)
-
-
+        - `models`: Stores model weights
+        - `results`: Stores results of training and validation, by type of spectrogram, as well as composite 

@@ -3,6 +3,7 @@ import pickle
 
 from constants import *
 
+# Generic loader class that sets up some basic filepath stuff
 class Loader: 
     def __init__(self, path, spectrogram_type, run_path):
         self.data = {}
