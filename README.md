@@ -1,9 +1,5 @@
 # cmsc730-project
 
-## Description 
-
-Given acoustic data captured by 
-
 ## Getting started
 
 **Requirements** 
