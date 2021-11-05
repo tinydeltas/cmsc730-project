@@ -9,11 +9,9 @@ from gen_datasets import DatasetLoader
 from constants import *
 
 run = datetime.now().strftime("%m_%d_%Y_%H:%M:%S")
-dataset_path = "./tmp"
-run_path = os.path.join(dataset_path, run)
+run_path = os.path.join(param_dataset_path, run)
 
 ways = np.arange(1, 9, 1)
-
 
 def nearest_neighbour_correct(pairs, targets):
     """
@@ -48,7 +46,7 @@ def compare_all(save_path, accs):
     for name in accs: 
         plt.plot(ways, accs[name], color[0], label=name)
         color = color[1:]
-    
+ 
     plt.plot(ways, 100.0 / ways, "r", label="random")
     ax.legend()
     
@@ -70,7 +68,14 @@ def compare(loader, model):
     plt.plot(ways, nn_accs, "c", label="nearest neighbor")
     plt.plot(ways, 100.0 / ways, "r", label="random")
     
+    plt.xlabel("Number of classes in one-shot tasks")
+    plt.ylabel("% Accuracy")
+    
+    for i, v in enumerate(val_accs):
+        ax.text(i+1, v+5, "%d" %v)
+    
     ax.legend()
+    
     
     results_path = os.path.join(loader.results_folder, loader.spectrogram_type)
     plt.savefig(results_path, dpi=100)
@@ -102,9 +107,9 @@ def main():
             results_folder = loader.results_folder
         
         model = loader.train()
-        
+        val_accs = compare(loader, model)
         # save validation accuracies
-        accs[spectrogram_type] = compare(loader, model)
+        accs[spectrogram_type] = val_accs
     
     compare_all(results_folder, accs)
         

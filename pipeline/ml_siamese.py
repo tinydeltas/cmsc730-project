@@ -19,6 +19,7 @@ K.set_image_data_format('channels_last')
 from ml_generic import Loader
 from constants import *
 
+# Class for Siamese network implementation
 class OneshotLoader(Loader): 
     def __init__(self, path, spectrogram_type, run_path):
         super().__init__(path, spectrogram_type, run_path)
