@@ -19,16 +19,16 @@ ipython kernel install --name "local-venv" --user
 python -m pip install -r requirements.txt
 ```
 
-2. Run `gen_spectrograms.py`: Generates spectrogram images from the `.wav` raws. Stores them in `param_data_path` (see below). 
+2. Run `01-gen_spectrograms.py`: Generates spectrogram images from the `.wav` raws. Stores them in `param_data_path` (see below). 
 
 ```
-python gen_spectrograms.py 
+python 01-gen_spectrograms.py 
 ```
 
-3. Run `pipeline.py`: Defines and trains input image types on 7-layer CNN Siamese network model. Takes about 10 minutes per image type, for total of ~1.5 hours to train and compare on every image type. 
+3. Run `02-pipeline.py`: Defines and trains input image types on 7-layer CNN Siamese network model. Takes about 10 minutes per image type, for total of ~1.5 hours to train and compare on every image type. 
 
 ```
-python pipeline.py 
+python 02-pipeline.py 
 ```
 
 ## Directory overview 

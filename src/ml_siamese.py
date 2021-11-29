@@ -47,6 +47,7 @@ class OneshotLoader(Loader):
 
         model = Sequential()
         
+        # Ported
         model.add(Conv2D(64, 
                         (10,10), 
                         activation='relu', 
@@ -54,8 +55,10 @@ class OneshotLoader(Loader):
                         kernel_initializer=self.initialize_weights, 
                         kernel_regularizer=l2(2e-4)))
         
+        # Ported 
         model.add(MaxPooling2D())
         
+        # Ported
         model.add(Conv2D(128, 
                         (7,7),
                         activation='relu',
@@ -63,8 +66,10 @@ class OneshotLoader(Loader):
                         bias_initializer=self.initialize_bias,
                         kernel_regularizer=l2(2e-4)))
         
+        # Ported
         model.add(MaxPooling2D())
         
+        # Ported 
         model.add(Conv2D(128,
                         (4,4),
                         activation='relu',
@@ -72,8 +77,10 @@ class OneshotLoader(Loader):
                         bias_initializer=self.initialize_bias,
                         kernel_regularizer=l2(2e-4)))
         
+        # Ported 
         model.add(MaxPooling2D())
         
+        # Ported
         model.add(Conv2D(256, 
                         (4,4),
                         activation='relu',
@@ -81,20 +88,25 @@ class OneshotLoader(Loader):
                         bias_initializer=self.initialize_bias,
                         kernel_regularizer=l2(2e-4)))
         
+        # Ported
         model.add(Flatten())
         
+        # Ported
         model.add(Dense(4096,
                         activation='sigmoid', 
                         kernel_regularizer=l2(1e-3), 
                         kernel_initializer=self.initialize_weights,
                         bias_initializer=self.initialize_bias))
         
+        # Ported
         encoded_l = model(left)
         encoded_r = model(right)
-        
+
+        # Ported
         L1_layer = Lambda(lambda tensors:K.abs(tensors[0] - tensors[1]))
         L1_distance = L1_layer([encoded_l, encoded_r])
         
+        # Ported
         prediction = Dense(1,
                         activation='sigmoid',
                         bias_initializer=self.initialize_bias)(L1_distance)
