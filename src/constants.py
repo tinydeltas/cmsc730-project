@@ -44,3 +44,5 @@ param_dataset_path = "./tmp"
 param_training_percentage = 0.55 
 
 param_wav_directory = "./data/wav"
+
+param_model_path = "models/model_weights.h5"

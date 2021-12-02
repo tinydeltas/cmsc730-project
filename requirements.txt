@@ -6,4 +6,6 @@ tensorflow
 keras
 numpy
 scipy
+matplotlib
+opencv-python
 

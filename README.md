@@ -19,13 +19,13 @@ ipython kernel install --name "local-venv" --user
 python -m pip install -r requirements.txt
 ```
 
-2. Run `01-gen_spectrograms.py`: Generates spectrogram images from the `.wav` raws. Stores them in `param_data_path` (see below). 
+2. Run `00-gen_spectrograms.py`: Generates spectrogram images from the `.wav` raws. Stores them in `param_data_path` (see below). 
 
 ```
 python 01-gen_spectrograms.py 
 ```
 
-3. Run `02-pipeline.py`: Defines and trains input image types on 7-layer CNN Siamese network model. Takes about 10 minutes per image type, for total of ~1.5 hours to train and compare on every image type. 
+3. Run `01-pipeline.py`: Defines and trains input image types on 7-layer CNN Siamese network model. Takes about 10 minutes per image type, for total of ~1.5 hours to train and compare on every image type. 
 
 ```
 python 02-pipeline.py 
@@ -90,3 +90,16 @@ Temporary folders
     - `YYYY-MM-DD HH-MM-SS`: Overall run folder, corresponding to each time `pipeline.py` is run. 
         - `models`: Stores model weights
         - `results`: Stores results of training and validation, by type of spectrogram, as well as composite 
+
+## Todo 
+
+[ ] Add documentation for setting up the Matlab portion 
+
+Download Matlab
+Install Signal Processing kit () 
+Follow instructions on https://www.mathworks.com/help/matlab/matlab_external/install-the-matlab-engine-for-python.html 
+
+```
+cd "matlabroot/extern/engines/python"
+python setup.py install
+```

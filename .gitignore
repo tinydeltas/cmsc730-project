@@ -1,5 +1,6 @@
 .DS_Store
 venv 
+data/
 pipeline/__pycache__
 models
 tmp
