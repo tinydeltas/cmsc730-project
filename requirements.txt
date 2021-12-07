@@ -3,6 +3,7 @@ PyObjC
 playsound
 librosa
 tensorflow
+schedule
 keras
 numpy
 scipy
