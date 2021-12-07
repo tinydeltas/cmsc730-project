@@ -1,7 +1,7 @@
 .DS_Store
 venv 
 data/raw
-data/processed
+# data/processed
 data/old
 pipeline/__pycache__
 models
