@@ -6,7 +6,7 @@ import cv2 as cv
 
 import numpy.random as rng
 from keras import backend as K
-from keras.layers import Conv2D, Conv1D, Input
+from keras.layers import Conv2D, Conv1D, Input, Dropout
 from keras.layers.core import Dense, Flatten, Lambda
 from keras.layers.pooling import MaxPooling2D
 from keras.models import Model, Sequential
@@ -15,6 +15,7 @@ from keras.regularizers import l2
 from sklearn.utils import shuffle
 from tensorflow.keras.optimizers import Adam
 
+import data.params as dpm 
 K.set_image_data_format('channels_last')
 
 import params
@@ -51,8 +52,24 @@ class OneshotLoader(Loader):
         suggests to initialize CNN layer weights with mean as 0.0 and standard deviation of 0.01
         """
         return np.random.normal(loc = 0.0, scale = 1e-2, size = shape)
-
+    
     def get_model(self, in_shape): 
+        CNNmodel = Sequential()
+        CNNmodel.add(Conv2D(32, (3, 3), activation='relu', input_shape=in_shape))
+        CNNmodel.add(MaxPooling2D((2, 2)))
+        CNNmodel.add(Dropout(0.2))
+        CNNmodel.add(Conv2D(64, (3, 3), activation='relu'))
+        CNNmodel.add(MaxPooling2D((2, 2)))
+        CNNmodel.add(Dropout(0.2))
+        CNNmodel.add(Conv2D(64, (3, 3), activation='relu'))
+        CNNmodel.add(Flatten())
+        CNNmodel.add(Dense(64, activation='relu'))
+        CNNmodel.add(Dropout(0.2))
+        CNNmodel.add(Dense(32, activation='relu'))
+        CNNmodel.add(Dense(24, activation='softmax'))
+        return CNNmodel
+
+    def get_siamese_model(self, in_shape): 
         print("shape: ", in_shape)
         # Needed to fix some tensorflow compilation errors
         os.environ['KMP_DUPLICATE_LIB_OK'] = 'TRUE'
@@ -60,13 +77,11 @@ class OneshotLoader(Loader):
         left = Input(in_shape)
         right = Input(in_shape)
         
-        
-
         model = Sequential()
         
         print("adding layers")
         # Ported
-        model.add(Conv2D(8, 
+        model.add(Conv2D(64, 
                         (10,10), 
                         activation='relu', 
                         input_shape=in_shape,
@@ -140,15 +155,15 @@ class OneshotLoader(Loader):
         X = self.data[s]
         # print("Data: ", X)
         
-        n_classes, n_examples, w, h, _ = X.shape
-        print("get_batch: ", n_classes, n_examples, w, h)
+        n_classes, n_examples, w, h, z = X.shape
+        print("get_batch: ", n_classes, n_examples, w, h, z)
         # Randomly sample several classes to use in the batch
         categories = rng.choice(n_classes, 
                                 size=(batch_size,),
                                 replace=False)
         
         # Initialize 2 empty arrays for the input image batch
-        pairs =[ np.zeros((batch_size, w, h, 1)) for i in range(2) ]
+        pairs =[ np.zeros((batch_size, w, h, z)) for i in range(2) ]
         
         # Initialize vector for the targets, and make one half of it '1's, so 2nd half of batch has same class
         targets = np.zeros((batch_size,))
@@ -159,7 +174,7 @@ class OneshotLoader(Loader):
             
             idx_1 = rng.randint(0, n_examples)
             
-            pairs[0][i,:,:,:] = X[category, idx_1].reshape(w, h, 1)
+            pairs[0][i,:,:,:] = X[category, idx_1].reshape(w, h, z)
             idx_2 = rng.randint(0, n_examples)
             
             # Pick images of same class for 1st half, different for 2nd
@@ -170,7 +185,7 @@ class OneshotLoader(Loader):
                 # ..different category
                 category_2 = (category + rng.randint(1,n_classes)) % n_classes
             
-            pairs[1][i,:,:,:] = X[category_2,idx_2].reshape(w, h, 1)
+            pairs[1][i,:,:,:] = X[category_2, idx_2].reshape(w, h, z)
         return pairs, targets
     
     def generate(self, batch_size, s="train"):
@@ -195,18 +210,21 @@ class OneshotLoader(Loader):
         true_category = categories[0]
         ex1, ex2 = rng.choice(n_examples, replace=False, size=(2,))
 
-        test_image = np.asarray([ X[true_category,ex1,:,:] ] * N).reshape(N, w, h, 1)
+        test_image = np.asarray([ X[true_category,ex1,:,:] ] * N).reshape(N, w, h, params.z)
         
         if test_image_path is not None: 
             # Load in the image here 
-            # img_raw = cv.imread(test_image_path)
-            # img_arr = np.asarray(img_raw).reshape(w, h, 1)
-            img_arr = np.load(test_image_path).reshape(w, h, 1)
-            test_image = np.asarray([img_arr] * N).reshape(N, w, h, 1)
+
+            if dpm.using_image:
+                img_raw = cv.imread(test_image_path)
+                img_arr = np.asarray(img_raw).reshape(w, h, params.z) 
+            else: 
+                img_arr = np.load(test_image_path).reshape(w, h, params.z)
+                test_image = np.asarray([img_arr] * N).reshape(N, w, h, params.z)
         
         support_set = X[categories,indices,:,:]
         support_set[0,:,:] = X[true_category,ex2]
-        support_set = support_set.reshape(N, w, h, 1)
+        support_set = support_set.reshape(N, w, h, params.z)
         
         targets = np.zeros((N,))
         targets[0] = 1

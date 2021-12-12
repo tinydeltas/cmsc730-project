@@ -23,6 +23,8 @@ def trim_image(name):
     return im.crop(bbox)
 
 def resize_image(name): 
+    height = 200
+    width = 200
     im = Image.open(name)
     return im.resize((height, width))
         
@@ -33,6 +35,8 @@ def process_wav(wavname):
     frame_rate = wav.getframerate()
     wav.close()
     return si, frame_rate
+
+
     
 class SpectrogramLoader: 
     def __init__(self, gesture_label, datestamp, wavname=None): 
@@ -47,7 +51,7 @@ class SpectrogramLoader:
         return self.sr
 
     def get_spectrogram(self, path=None): 
-        # fig = plt.figure(num=None, figsize=(1, 1), dpi=100, frameon=False)
+        fig = plt.figure(num=None, figsize=(3, 3), dpi=100, frameon=False)
         
         si, fr = process_wav(self.wavname)
         # ax = plt.Axes(fig, [0., 0., 1., 1.])
@@ -60,9 +64,8 @@ class SpectrogramLoader:
         f = Pxx[:800,:]
         f = np.expand_dims(f, axis=2)
         
-        # self.save_spectrogram(fig, "spectrogram", False, path)
-        self.save_spectrogram_array(f, "spectrogram", path)
-
+        self.save_spectrogram(fig, "spectrogram", False, path)
+        # self.save_spectrogram_array(f, "spectrogram", path)
         
     def save_spectrogram_array(self, pxx, kind, path): 
         if path is None: 
@@ -121,8 +124,10 @@ class SpectrogramLoader:
                             self.gesture_label, 
                             self.datestamp + "/"]
         base_path = "/".join(path_components)
-        # path = base_path + self.id + ".png"
-        path = base_path + self.id
+        if dpm.using_image: 
+            path = base_path + self.id + ".png"
+        else: 
+            path = base_path + self.id
         return path, base_path 
         
         
@@ -147,9 +152,8 @@ class SpectrogramLoader:
         
         if librosa: 
             trim_image(path)
-        
-        im = resize_image(path)
-        im.save(path)
+            im = resize_image(path)
+            im.save(path)
 
     def get_all_spectrograms(self): 
         # self.get_mel_spectrogram()

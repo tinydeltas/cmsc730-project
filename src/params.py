@@ -1,10 +1,8 @@
-
-
 # The input image (spectrogram) types we are interested in feeding 
 # to the ML model for training and validation. 
 input_image_types = [ 
-    # "mel",              # Mel spectrogram
-    # "stft",             # Short-time fourier transform 
+    "mel",              # Mel spectrogram
+    "stft",             # Short-time fourier transform 
     "spectrogram"       # Generic spectrogram
     
     # The following have been retired due to poor performance
@@ -47,25 +45,44 @@ default_gestures = [
 ]
 
 source_wav_directory = "./data/raw/audio"
-# source_wav_directory = ""
 
-model = "siamese"
-x = 800
-y = 581
-
+# Used for spectrogram generation 
 fs = 48000
 nfft = int(0.1 * fs)
 noverlap = int(0.095 * fs)
 
-predict_spectrogram_type = "mel"
-predict_run_path = "../../tmp/best_1000"
+# Used for prediction 
 
-n_prediction_per = 10
+data_root = "./static/data/"
+
+model_path = data_root + "model"
+
+live_wav_path = data_root + "source.wav"
+live_wav_directory = data_root + "/raw"
+historical_wav_directory = data_root + "/raw_historical"
+
+live_spectrogram_path = data_root + "s.png"
+live_gesture_prediction = data_root + "gesture.txt"
+live_predictions_path = data_root = "predictions.txt"
 
 average_window_ms = 500
 clip_duration_ms = 1000
 clip_stride_ms = 1000
 suppression_ms = 500
 detection_threshold = 0.5
+
+# Deprecated 
+model = "siamese"
+
+x = 800
+y = 581
+z = 1
+
+
+predict_spectrogram_type = "mel"
+predict_run_path = "../../tmp/best_1000"
+
+n_prediction_per = 10
+
 
 minimum_count = 4

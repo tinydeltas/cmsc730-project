@@ -44,15 +44,19 @@ class DatasetLoader:
         
         # get n_samples as minimum # of samples n the gesture folders
         for g in gestures: 
+            num_per_gesture = 0 
             gesture_path = os.path.join(self.all_folder, g)
             gesture_data_paths[g] = []
             for date in os.listdir(gesture_path): 
+                if date == '.DS_Store': 
+                    continue
                 path = os.path.join(gesture_path, date)
                 files = [ os.path.join(path, name) for name in os.listdir(path) if name.endswith(p.data_type)]
-                if len(files) < min_examples: 
-                    min_examples = len(files) 
+                num_per_gesture += len(files)
                 if len(files) > 0: 
                     gesture_data_paths[g] += files
+            if num_per_gesture < min_examples: 
+                min_examples = num_per_gesture 
         
         n_examples = min_examples 
         n_training = int(n_examples * p.training_percentage)
