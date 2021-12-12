@@ -21,6 +21,7 @@
                 {{ message }}
                 <p></p>
                 <p>All predictions, spectrogram, etc lags about ~3 seconds behind.</p>
+                <p>Detection threshold: 0.35 </p>
             </div>
 
             <div class="column col-12">
@@ -75,7 +76,7 @@
         .then(json => element.innerHTML = json.gesture)
         .catch(error => console.error(error))
 
-        setTimeout(fetchGesture, 5000);
+        setTimeout(fetchGesture, 500);
     }
 
     function fetchPredictions() {
@@ -86,14 +87,14 @@
         .then(json => element.innerHTML = JSON.stringify(json.predictions, null, 2))
         .catch(error => console.error(error))
 
-        setTimeout(fetchPredictions, 5000);
+        setTimeout(fetchPredictions, 500);
     }
 
     function fetchSpectrogram() {
         const element = document.getElementById("spectrogram_listener"); 
         var unique = $.now();
         element.innerHTML = "<img src='static/data/s.png?" + unique + "'>";
-        setTimeout(fetchSpectrogram, 5000);
+        setTimeout(fetchSpectrogram, 500);
     }
 
     document.addEventListener("DOMContentLoaded", function(event) {

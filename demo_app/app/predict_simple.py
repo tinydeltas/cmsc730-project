@@ -1,13 +1,12 @@
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
-from tensorflow import keras
 import subprocess
 import time
-import soundfile as sf 
-import numpy as np 
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
+from pprint import pprint
+
+import numpy as np
+from tensorflow import keras
+from watchdog.events import FileSystemEventHandler
+from watchdog.observers import Observer
+
 import os
 
 receiver_pid = -1 
@@ -22,41 +21,26 @@ live_wav_directory = data_root + "/raw"
 live_wav_path = os.path.join(data_root, "source.wav")
 historical_wav_directory = data_root + "/raw_historical"
 
-live_spectrogram_path = os.path.join(data_root, "s.png")
 live_gesture_prediction = os.path.join(data_root, "gesture.txt")
 live_predictions_path = os.path.join(data_root, "predictions.txt")
+live_numpy_path = os.path.join(data_root, "live.npy")
+
+detection_threshold = 0.35
 
 dry_run = False
 
-# Used for spectrogram generation 
-fs = 48000
-nfft = int(0.1 * fs)
-noverlap = int(0.095 * fs)
-
-
-def get_spectrogram_live(wavpath):
-    plt.figure(num=None, figsize=(3, 3), dpi=100, frameon=False)
-    si, fr = sf.read(wavpath)
-    Pxx, _, _, _ = plt.specgram(si, Fs=fr, NFFT=nfft, window=None, noverlap=noverlap)
-    spec = 20 * np.log10(Pxx[0:800,:])
-
-    print("saving spectrogram to: ", live_spectrogram_path)
-    plt.savefig(live_spectrogram_path, dpi=100)
-    return spec
+def get_spectrogram_array(np_save_path): 
+    arr = np.load(np_save_path)
+    return arr
 
 def shape_data(arr):
-    data, label = [], []
-
+    data = []
     data.append(arr)
-    label = [ i for i in range(len(gestures))]
-
-    data = np.reshape(np.array(data), (800, 581, 1))
-    label = np.array(label)
+    data = np.reshape(np.array(data), (1, 800, 581, 1))
     
     print(data.shape)
-    print(label.shape)
 
-    return data, label
+    return data
 
 def start_recording(): 
     global receiver_pid
@@ -75,30 +59,31 @@ class FileModifiedHandler(FileSystemEventHandler):
     def on_modified(self, event): 
         print(".wav file modified!")
         # Also saves the file
-        specdata = get_spectrogram_live(live_wav_path)
-        data, label = shape_data(specdata)
-        
-        input = np.concatenate(data, label)
-        print(input.shape)
-        predictions = self.model.predict(input, verbose=1)
+        specdata = get_spectrogram_array(live_numpy_path)
+        data= shape_data(specdata)
+        predictions = self.model.predict(data, verbose=1)
         print(predictions)
-        # zipped = zip(all_probs, keys)
-        # zipped_sorted = sorted(zipped)
-        # print(zipped_sorted)
+        all_probs = predictions[0]
         
-        # s = sorted(all_probs, reverse=True)
-        # if (s[0] > self.recognizer.detection_threshold()):
-        #     idx = np.argmax(all_probs)
-        #     label = keys[idx]
-        #     print("predicted gesture: ", label, " with probability: ", all_probs[idx])
-        # else: 
-        #     label = "None"
+        zipped = zip(all_probs, gestures)
+        zipped_sorted = sorted(zipped, reverse=True)
+        print(zipped_sorted)
         
-        # with open(params.live_gesture_prediction, "w") as f: 
-        #     f.write(label)
+        if zipped_sorted[0][0] > detection_threshold:
+            label = zipped_sorted[0][1]
+            print("predicted gesture: ", label, " with probability: ", zipped_sorted[0][0])
+        else: 
+            label = "None"
         
-        # with open(params.live_predictions_path, "w") as f: 
-        #     f.write(probabilities)
+        with open(live_gesture_prediction, "w") as f: 
+            f.write(label)
+        
+        d = {}
+        for t in zipped_sorted: 
+            d[t[1]] = t[0]
+    
+        with open(live_predictions_path, "w") as f: 
+            print(d, file=f)
 
 def main(): 
     model = keras.models.load_model(model_path)

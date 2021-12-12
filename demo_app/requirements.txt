@@ -5,4 +5,5 @@ wave
 numpy
 watchdog
 matplotlib
+soundfile
 
