@@ -1,5 +1,10 @@
 .DS_Store
 venv 
+data/raw
+demo_app/node_modules
+demo_app/app/static/data/raw_historical/
+data/processed
+data/old
 pipeline/__pycache__
 models
 tmp

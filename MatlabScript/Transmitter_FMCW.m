@@ -1,6 +1,6 @@
 function Transmitter_FMCW()
     %%
-    filename = "UpdatedResampledTx.wav";
+    filename = "8-16kHz_20ms.wav";
     [Tx, Fs] = audioread(filename);
     %%
     duration = length(Tx)/Fs;

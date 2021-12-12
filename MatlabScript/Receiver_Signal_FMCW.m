@@ -1,9 +1,9 @@
-function Receiver_Signal_FMCW()
+function Receiver_Signal_FMCW(filename)
     %%
     %clc; clear all; close all;
     %%
-    StoringDirectory = "StoreData/";    % saving directory
-    filename = "Sample_1";              % name of a spectrogram file
+    StoringDirectory = "";    % saving directory
+    % filename = "Sample_1";              % name of a spectrogram file
     Fs = 48000;                         % sampling rate
     T = 0.02;                           % 20 ms
     duration = 1;                       % Data Collection
@@ -24,7 +24,7 @@ function Receiver_Signal_FMCW()
         TransmittedSig = [TransmittedSig; y];
     end
     %%
-    recObj = audiorecorder(Fs, 16, 1, 1);
+    recObj = audiorecorder(Fs, 16, 1, 0);
     %%
     disp('Start speaking.');
     recordblocking(recObj, duration);
@@ -36,12 +36,13 @@ function Receiver_Signal_FMCW()
     %%
     if(plottt)
         figure; 
-        spectrogram(y, win, overlapLength, NumFFT, Fs, 'yaxis');
+        spectrogram(received, win, overlapLength, NumFFT, Fs, 'yaxis');
         title('Spectrogram');
     end
-    [Spec, frequency, time] = spectrogram(y, win, overlapLength, NumFFT, Fs, 'yaxis');
+    [Spec, frequency, time] = spectrogram(received, win, overlapLength, NumFFT, Fs, 'yaxis');
     if(saving)
-        outfile = strcat(StoringDirectory,filename,".mat");
+        outfile = strcat(StoringDirectory, filename, ".mat");
+        audiowrite(filename + ".wav", received, Fs);
         save(outfile, "Spec");
     end
     

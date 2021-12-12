@@ -1,9 +1,0 @@
-gTTS
-PyObjC
-playsound
-librosa
-tensorflow
-keras
-numpy
-scipy
-

@@ -2,6 +2,7 @@
 
 python3 -m venv venv 
 source venv/bin/activate
-pip install jupyter
+
+python3 -m pip install jupyter
 ipython kernel install --name "local-venv" --user
-python -m pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
