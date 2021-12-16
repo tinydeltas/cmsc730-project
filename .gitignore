@@ -8,4 +8,5 @@ data/old
 pipeline/__pycache__
 models
 tmp
+__pycache__
 

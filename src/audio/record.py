@@ -4,12 +4,34 @@ import time
 from datetime import datetime
 import matlab.engine
 import subprocess
+import matplotlib
+import soundfile as sf 
+import numpy as np
+
+import matplotlib.pyplot as plt
 
 eng = matlab.engine.start_matlab()
 run = datetime.now().strftime("%m_%d_%Y_%H:%M:%S")
+fs = 48000
+nfft = int(0.1 * fs)
+noverlap = int(0.095 * fs)
 
 directory_default = "audio_new_microphone_sync_4s"
-gesture_label_default = "test"
+gesture_label_default = "1s"
+
+def get_spectrogram_live(wavpath, save_path):
+    plt.figure(num=None, figsize=(3, 3), dpi=100, frameon=False)
+    si, fr = sf.read(wavpath)
+    
+    # plt.axis(ymin=0, ymax=8000)
+    Pxx, _, _, _ = plt.specgram(si, Fs=fr, NFFT=nfft, window=None, noverlap=noverlap)
+    spec = 20 * np.log10(Pxx[0:800,:])
+
+    print("saving spectrogram to: ", save_path)
+    plt.savefig(save_path, dpi=100)
+    
+    # np.save(live_numpy_path, spec)
+    return spec
 
 def record(directory, gesture_label, i): 
     # print("Starting transmission")
@@ -32,8 +54,10 @@ def record(directory, gesture_label, i):
             
             path = os.path.join(fullpath, str(i))
             print("Saving to: ", path)
+            
         
             eng.Receiver_Signal_FMCW(path, nargout=0)
+            get_spectrogram_live(path + ".wav", path + ".png")
             i += 1
             
             # input("Press enter to continue, or Ctrl-C to quit")

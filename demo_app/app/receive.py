@@ -37,6 +37,8 @@ noverlap = int(0.095 * fs)
 def get_spectrogram_live(wavpath, save_path):
     plt.figure(num=None, figsize=(3, 3), dpi=100, frameon=False)
     si, fr = sf.read(wavpath)
+    
+    # plt.axis(ymin=0, ymax=8000)
     Pxx, _, _, _ = plt.specgram(si, Fs=fr, NFFT=nfft, window=None, noverlap=noverlap)
     spec = 20 * np.log10(Pxx[0:800,:])
 

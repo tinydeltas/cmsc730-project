@@ -1,6 +1,6 @@
 function Transmitter_FMCW()
     %%
-    filename = "transmit.wav";
+    filename = "signal/transmit_long.wav";
     [Tx, Fs] = audioread(filename);
     %%
     duration = length(Tx)/Fs;
