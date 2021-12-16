@@ -6,7 +6,7 @@
 Python 3.73+
 
 May need twiddling to work on an M1 chip. 
-### General setup 
+### Preliminaries: General setup 
 
  Set up virtualenv using `setup.sh` or by running 
 
@@ -20,23 +20,27 @@ ipython kernel install --name "local-venv" --user
 python -m pip install -r requirements.txt
 ```
 
-### 1. Collect data 
+### Step 1: Collect data 
 
-1. Download Matlab
+1. Download and install Matlab
 2. Install Signal Processing Toolbox (https://www.mathworks.com/products/signal.html)
-3. Follow instructions to set up Matlab with python https://www.mathworks.com/help/matlab/matlab_external/install-the-matlab-engine-for-python.html 
+3. Follow instructions to set up Matlab with Python https://www.mathworks.com/help/matlab/matlab_external/install-the-matlab-engine-for-python.html 
 
 ```
 cd "matlabroot/extern/engines/python"
 python setup.py install
 ```
 
-4. Run `/src/audio/record.py`, tweaking the `directory_default` and `gesture_label_default` parameters accordingly. 
+4. Run `/src/audio/record.py`, tweaking the `directory_default` and `gesture_label_default` parameters accordingly. This will save the samples to `src/audio` 
 
-### 2. Train model on collected dataset 
+5. Move the samples you'd like to use under `data/raw/audio`
+
+### Step 2: Train model on collected dataset 
 
 
 1. Generate spectrograms from the `.wav` raws of your samples. Stores them in `/data`. 
+
+Looks for your raw WAV files under `data/raw/audio`
 
 ```
 python gen_spectrograms.py 
@@ -44,22 +48,25 @@ python gen_spectrograms.py
 
 2. Train your model: Defines and trains input image types on 7-layer CNN Siamese network model. Takes about 10 minutes per image type, for total of ~1.5 hours to train and compare on every image type. 
 
+Looks for your processed spectrogram files under `data/processed/images`
+
 ```
 python pipeline.py 
 ```
 
 ### Step 3: Live gesture detection 
 
-1. cd into `demo_app`
-2. Start the Flask server
+1. Install requirements 
+2. Place Keras model trained above into `demo_app/static/data/model`
+3. Start the Flask server
 ``` 
 ./start_flask.sh` 
 ```
-3. Navigate to http://localhost:5000 
-4. Click "Start Recording" and wait for signal to broadcast 
-5. Start gesturing! 
+4. Navigate to http://localhost:5000 
+5. Click "Start Recording" and wait 10s for signal to broadcast, and start gesturing! 
 
 ## Directory overview 
+
 - `data/`: Data for predefined gestures. 
     - `images`: The spectrogram images generated from the raw `.wav` files
     - `wav`: The raw `.wav` files of the eight predefined gestures, collected by the SEEED microphone mounted on a raspberry pi. 
