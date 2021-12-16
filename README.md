@@ -20,7 +20,9 @@ ipython kernel install --name "local-venv" --user
 python -m pip install -r requirements.txt
 ```
 
-### Step 1: Collect data 
+### Step 1: Collect data for your gestures 
+
+You can also use our dataset based on 8 predefined gestures(https://github.com/tinydeltas/cmsc730-project/blob/main/docs/videos/recording_all.mov), available here: https://drive.google.com/file/d/18hm1RU70tTb_t4tOmPw_p5gTfLb840NV/view?usp=sharing 
 
 1. Download and install Matlab
 2. Install Signal Processing Toolbox (https://www.mathworks.com/products/signal.html)
