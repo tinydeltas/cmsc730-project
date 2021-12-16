@@ -7,7 +7,7 @@ function Receiver_Signal_FMCW(filename)
     Fs = 48000;                             % sampling rate
     T = 0.02;                               % 20 ms
     T_new = 0.1;                           % 10 ms 
-    duration = 3;                           % Data Collection
+    duration = 1;                           % Data Collection
     plottt = 0;                         
     saving = 1;
     %%
@@ -21,8 +21,8 @@ function Receiver_Signal_FMCW(filename)
     mkdir(StoringDirectory);
     %%
     %%
-    transmit_name = "app/static/data/signal/transmit_3s.wav";
-    [Txf, Fsf] = audioread(transmit_name);
+    // transmit_name = "app/static/data/signal/UpdatedResampledTx.wav";
+    // [Txf, Fsf] = audioread(transmit_name);
     %%
     [Tx, FsTx] = audioread("app/static/data/signal/8-16kHz_20ms.wav");
     y = resample(Tx,Fs,FsTx);
@@ -32,7 +32,7 @@ function Receiver_Signal_FMCW(filename)
     end
     %%
     recObj = audiorecorder(Fs, 16, 1, 0);
-    sound(Txf, Fsf);
+    // sound(Txf, Fsf);
     recordblocking(recObj, duration);
     CollectedData = getaudiodata(recObj);
     %%

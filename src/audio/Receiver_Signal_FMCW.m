@@ -21,10 +21,10 @@ function Receiver_Signal_FMCW(filename)
     mkdir(StoringDirectory);
     %%
     %%
-    transmit_name = "static/data/signal/transmit_3s.wav";
+    transmit_name = "signal/transmit_4s.wav";
     [Txf, Fsf] = audioread(transmit_name);
     %%
-    [Tx, FsTx] = audioread("static/data/signal/8-16kHz_20ms.wav");
+    [Tx, FsTx] = audioread("signal/8-16kHz_20ms.wav");
     y = resample(Tx,Fs,FsTx);
     TransmittedSig = [];
     for i = 1:duration/T

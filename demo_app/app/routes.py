@@ -2,6 +2,7 @@ from flask import render_template, jsonify
 import subprocess 
 from app import app
 import pickle
+import os 
 import ast
 
 process_id = -1
@@ -9,6 +10,7 @@ process_id = -1
 data_root = "./app/static/data/"
 live_gesture_prediction = data_root + "gesture.txt"
 live_predictions_path = data_root + "predictions.txt"
+live_spectrogram_path = os.path.join(data_root, "s.png")
 
 @app.route("/flask", methods=['GET'])
 @app.route("/", methods=['GET'])
